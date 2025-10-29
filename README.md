@@ -67,7 +67,7 @@ Entrar na pasta do workspace:
 ```bash
 cd ~/ros2_ws
 ```
-BUildar packages(usar apenas 'colcon build' para buildar todos):
+Buildar packages(usar apenas 'colcon build' para buildar todos):
 ```bash
 colcon build --packages-select my_py_pkg
 ```
@@ -76,20 +76,25 @@ colcon build --packages-select my_py_pkg
 ```bash
 source install/setup.bash
 ```
+ou
+
+```bash
+source .bashrc
+```
+
 
 ## 8. Rodar o node
 ```bash
 ros2 run my_py_pkg nome_do_executavel
 ```
 
----
 
 > Dica: Sempre cheque permissões e se o node está listado corretamente no `setup.py`.
 
 
 ---
 
-## Comandos úteis ROS2
+# Comandos úteis ROS2
 
 ### Listar nodes em execução
 ```bash
