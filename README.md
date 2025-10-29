@@ -2,7 +2,7 @@
 
 ## 1. Criar o arquivo do node
 
-Lembrar de estar na pasta correta:
+Lembrar de estar na pasta correta(exemplo):
 ```bash
 cd ros2_ws/src/my_py_pkg/my_py_pkg
 ```
