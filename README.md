@@ -3,6 +3,9 @@
 ## 1. Criar o arquivo do node
 ```bash
 cd ros2_ws/src/my_py_pkg/my_py_pkg
+```
+
+```bash
 touch nome_do_node.py
 ```
 
