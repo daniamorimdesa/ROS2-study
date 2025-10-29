@@ -62,8 +62,13 @@ No campo `entry_points`, adicione:
 - Se usou bibliotecas novas, adicione-as como `<exec_depend>nome_da_dependencia</exec_depend>`
 
 ## 6. Compilar o workspace
+
+Entrar na pasta do workspace:
 ```bash
 cd ~/ros2_ws
+```
+BUildar packages(usar apenas 'colcon build' para buildar todos):
+```bash
 colcon build --packages-select my_py_pkg
 ```
 
