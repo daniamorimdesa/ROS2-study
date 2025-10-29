@@ -30,7 +30,6 @@ def main(args=None):
     node = NumberCounterNode() # instanciar o nó
     rclpy.spin(node) # manter o nó ativo para processar callbacks(até que se aperte Ctrl+C)
     rclpy.shutdown() # finalizar o rclpy
-    
 #-----------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     main()
