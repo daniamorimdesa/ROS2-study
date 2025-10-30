@@ -2,6 +2,7 @@
 import rclpy
 from rclpy.node import Node
 from example_interfaces.srv import AddTwoInts
+from functools import partial
 
 class AddTwoIntsClient(Node):
 
@@ -18,11 +19,15 @@ class AddTwoIntsClient(Node):
         request.b = b
 
         future = self.client_.call_async(request) # chamar o serviço de forma assíncrona
-        future.add_done_callback(self.callback_call_add_two_ints) # adicionar uma função de callback para processar a resposta quando estiver pronta
+        # adicionar uma função de callback para processar a resposta quando estiver pronta
+        #future.add_done_callback(self.callback_call_add_two_ints) 
+        # se quiser passar argumentos adicionais para o callback, use partial
+        future.add_done_callback(partial(self.callback_call_add_two_ints, request=request))
     
-    def callback_call_add_two_ints(self, future): # função de callback que processa a resposta do serviço
+    def callback_call_add_two_ints(self, future, request): # função de callback que processa a resposta do serviço
         response = future.result()                # obter o resultado da resposta
-        self.get_logger().info(f"Got response: {str(response.sum)}") # registrar a soma recebida na resposta
+        # self.get_logger().info(f"Got response: {str(response.sum)}") # registrar a soma recebida na resposta
+        self.get_logger().info(f"Result of {request.a} + {request.b} = {response.sum}") # registrar a soma com os valores da requisição
 
 
 
@@ -30,6 +35,8 @@ def main(args=None):
     rclpy.init(args=args) # inicializar o rclpy
     node = AddTwoIntsClient() # instanciar o nó
     node.call_add_two_ints(3, 7) # chamar o serviço para adicionar 3 e 7
+    node.call_add_two_ints(1, 4) # chamar o serviço para adicionar 1 e 4
+    node.call_add_two_ints(50, 50) # chamar o serviço para adicionar 50 e 50
     rclpy.spin(node) # manter o nó ativo para processar callbacks(até que se aperte Ctrl+C)
     rclpy.shutdown() # finalizar o rclpy
 #-----------------------------------------------------------------------------------------------
