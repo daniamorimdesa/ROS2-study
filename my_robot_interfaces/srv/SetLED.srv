@@ -1,0 +1,6 @@
+# custom srv definition for the “set_led” service
+int64 led_number
+string led_state
+---
+# response: success or failure
+bool success
