@@ -10,11 +10,16 @@ class RobotNewsStationNode(Node):
 
         # declarar parâmetros
         self.declare_parameter("robot_name", "C3PO") # declarar o parâmetro "robot_name" com valor padrão "C3PO"
+        self.declare_parameter("timer_period", 0.5) # declarar o parâmetro "timer_period" com valor padrão 0.5 segundos
+
+        # obter os valores dos parâmetros
         self.robot_name = self.get_parameter("robot_name").value # obter o valor do parâmetro "robot_name"
+        self.timer_period = self.get_parameter("timer_period").value # obter o valor do parâmetro "timer_period"
+
         #self.robot_name = "C3PO" 
 
         self.publisher_ = self.create_publisher(String, "robot_news", 10) # criar um publicador no tópico "robot_news" com fila de tamanho 10
-        self.timer_ = self.create_timer(0.5, self.publish_news) # criar um timer que chama publish_news a cada 0.5 segundos
+        self.timer_ = self.create_timer(self.timer_period, self.publish_news) # criar um timer que chama publish_news a cada 0.5 segundos
         self.get_logger().info("Robot News has been started!")  # registrar uma mensagem de log
 
     def publish_news(self):
