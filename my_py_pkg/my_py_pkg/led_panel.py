@@ -11,9 +11,15 @@ class LEDPanelNode(Node):
 
     def __init__(self):
         super().__init__("led_panel") # criar um nó chamado "led_panel"
+
+        # declarar parâmetros
+        # parâmetros para os estados dos LEDs
+        self.declare_parameter("led_status", [0,0,0]) # declarar o parâmetro "led_status" com valor padrão [0,0,0]
+        self.led_status = self.get_parameter("led_status").value # obter o valor do parâmetro "led_status"
+
         self.led_status_publisher_ = self.create_publisher(LEDPanelStatus, "led_panel_status", 10) # criar um publicador no tópico "led_panel_status" com fila de tamanho 10
         self.timer_ = self.create_timer(1.0, self.publish_led_panel_status)    # criar um timer que chama publish_led_panel_status a cada 1 segundo
-        self.led_status = [0, 0, 0]  # estado inicial dos LEDs
+        # self.led_status = [0, 0, 0]  # estado inicial dos LEDs
 
         # criar um servidor de serviço chamado "set_led" que usa o tipo SetLED e chama callback_set_led quando uma requisição é recebida
         self.server_ = self.create_service(SetLED, "set_led", self.callback_set_led)
