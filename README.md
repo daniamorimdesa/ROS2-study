@@ -152,7 +152,7 @@ No lançamento do node:
 ros2 run my_py_pkg robot_news_station --ros-args -r __node:=my_station -r robot_news:=abc
 ```
 
-### Ver informação da mensagem de um tópico
+### Ver informação da mensagem de um tópico (exemplo)
 ```bash
 ros2 topic info /robot_news
 ```
