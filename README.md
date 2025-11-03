@@ -113,6 +113,11 @@ ros2 topic info /nome_do_topico
 
 ### Visualização gráfica dos nodes/tópicos
 ```bash
+rqt
+```
+ou
+
+```bash
 rqt_graph
 ```
 
