@@ -49,12 +49,12 @@ ros2 service list
 ros2 service type /service_name
 ```
 
-### Ver a interface do request/response
+### Ver a interface do request/response, usando o type do serviço (exemplo)
 ```bash
 ros2 interface show std_srvs/srv/Empty
 ```
 
-### Chamar um serviço pelo terminal
+### Chamar um serviço pelo terminal (exemplo)
 ```bash
 ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts "{a: 5, b: 7}"
 ```
