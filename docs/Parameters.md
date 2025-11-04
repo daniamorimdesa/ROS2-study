@@ -1,7 +1,7 @@
 # ROS2 Parameters: Parâmetros Dinâmicos para seus Nós
 
-## 1. Declarar parâmetros no código
-No seu node Python:
+## 1. Declarar parâmetros no código 
+No seu node Python(exemplo):
 ```python
 self.declare_parameter("number", 1)
 self.declare_parameter("timer_period", 1.0)
@@ -12,7 +12,7 @@ self.declare_parameter("timer_period", 1.0)
 ros2 param list
 ```
 
-## 3. Personalizar parâmetros pelo terminal
+## 3. Personalizar parâmetros pelo terminal (exemplo)
 Ao rodar um node, defina parâmetros com `--ros-args -p`:
 ```bash
 ros2 run my_py_pkg number_publisher --ros-args -p number:=3 -p timer_period:=3.0
@@ -49,7 +49,7 @@ ros2 param get /turtlesim background_g
    ```
 
 ## 6. Mudar valor do parâmetro em tempo de execução (callback)
-No código do node:
+No código do node (exemplo):
 ```python
 self.add_on_set_parameters_callback(self.parameters_callback)
 
@@ -60,7 +60,7 @@ def parameters_callback(self, params: list[Parameter]):
             self.get_logger().info(f"Parameter 'number' changed to: {self.number_}")
 ```
 
-## 7. Obter e setar parâmetros em tempo real
+## 7. Obter e setar parâmetros em tempo real (exemplo)
 - Obter valor atual:
   ```bash
   ros2 param get /number_publisher number
@@ -70,7 +70,7 @@ def parameters_callback(self, params: list[Parameter]):
   ros2 param set /number_publisher number 4
   ```
 
-## 8. Ver efeito em tempo real
+## 8. Ver efeito em tempo real (exemplo)
 Use:
 ```bash
 ros2 topic echo /number
