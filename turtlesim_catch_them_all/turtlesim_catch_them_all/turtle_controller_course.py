@@ -15,6 +15,7 @@ class TurtleControllerNode(Node):
         super().__init__("turtle_controller") # criar um nó chamado "turtle_controller"
 
         self.turtle_to_catch_ = None # tartaruga alvo para pegar
+        self.catch_closest_turtle_first = True
         self.pose_: Pose = None 
 
         #criar um subscriber pro /turtle1/pose para saber a posição atual da turtle1
@@ -40,7 +41,21 @@ class TurtleControllerNode(Node):
 
     def callback_alive_turtles(self, msg: TurtleArray): # processar a lista de tartarugas vivas recebida
         if len(msg.turtles) > 0:
-            self.turtle_to_catch_ = msg.turtles[0]
+            if self.catch_closest_turtle_first:
+                closest_turtle = None
+                closest_turtle_distance = None
+
+                for turtle in msg.turtles: # encontrar a tartaruga mais próxima
+                    dist_x = turtle.x - self.pose_.x
+                    dist_y = turtle.y - self.pose_.y
+                    distance = sqrt(dist_x*dist_x + dist_y*dist_y) # calcular a distância até a tartaruga
+
+                    if closest_turtle is None or distance < closest_turtle_distance: # atualizar a tartaruga mais próxima
+                        closest_turtle = turtle
+                        closest_turtle_distance = distance
+                self.turtle_to_catch_ = closest_turtle # definir a tartaruga alvo como a mais próxima
+            else:
+                self.turtle_to_catch_ = msg.turtles[0] # definir a tartaruga alvo como a primeira da lista
 
     def control_loop(self):
         if self.pose_ == None or self.turtle_to_catch_ is None:

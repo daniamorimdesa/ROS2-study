@@ -29,8 +29,6 @@ e(t) = erro (diferença entre a posição atual e a posição alvo)
 
 velocidade linear-> v = Kp_linear * erro_linear ; onde erro_linear = distância até o alvo
 velocidade angular-> w = Kp_angular * erro_angular
-
-
 """
 
 class TurtleControllerNode(Node):

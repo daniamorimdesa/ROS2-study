@@ -15,7 +15,7 @@ class TurtleSpawnerNode(Node):
         super().__init__("turtle_spawner") # criar um nó chamado "turtle_spawner"
 
         self.turtle_name_prefix_ = "turtle"
-        self.turtle_counter_ = 0 # contador de tartarugas spawnadas
+        self.turtle_counter_ = 1 # contador de tartarugas spawnadas
         self.alive_turtles_ = [] # lista de tartarugas vivas
 
         self.alive_turtles_publisher_ = self.create_publisher(TurtleArray, "alive_turtles", 10) # criar um publisher para as tartarugas vivas
@@ -26,8 +26,8 @@ class TurtleSpawnerNode(Node):
         # criar um serviço para pegar tartarugas
         self.catch_turtle_service_ = self.create_service(CatchTurtle, "catch_turtle", self.callback_catch_turtle) 
 
-        # criar um timer para spawnar tartarugas a cada 1 segundo
-        self.spawn_turtle_timer_ = self.create_timer(1.0, self.spawn_new_turtle)
+        # criar um timer para spawnar tartarugas a cada 0.5 segundos
+        self.spawn_turtle_timer_ = self.create_timer(0.5, self.spawn_new_turtle)
 
         self.get_logger().info("Turtle Spawner has been started!") # registrar uma mensagem de log
 
