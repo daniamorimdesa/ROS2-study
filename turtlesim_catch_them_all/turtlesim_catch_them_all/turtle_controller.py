@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
+from math import sqrt, atan2, pi
+from functools import partial
 import rclpy
 from rclpy.node import Node
 from turtlesim.msg import Pose
 from geometry_msgs.msg import Twist
-from math import atan2, pi, sqrt
+from my_robot_interfaces.msg import Turtle
 from my_robot_interfaces.msg import TurtleArray
 from my_robot_interfaces.srv import CatchTurtle
 
@@ -36,169 +38,104 @@ class TurtleControllerNode(Node):
     def __init__(self):
         super().__init__("turtle_controller") # criar um nó chamado "turtle_controller"
 
-        self.target_x = 8.0
-        self.target_y = 5.0
-        self.position_: Pose = None 
+        self.turtle_to_catch_ = None # tartaruga alvo para pegar
+        self.catch_closest_turtle_first = True
+        self.pose_: Pose = None 
 
         #criar um subscriber pro /turtle1/pose para saber a posição atual da turtle1
-        self.turtle1_pose_subscriber_ = self.create_subscription(Pose, "/turtle1/pose", self.callback_turtle1_pose, 10)
+        self.pose_subscriber_ = self.create_subscription(Pose, "/turtle1/pose", self.callback_pose, 10)
+
+        # criar um subscriber pro /alive_turtles para saber a lista de tartarugas vivas
+        self.alive_turtles_subscriber_ = self.create_subscription(TurtleArray, "alive_turtles", self.callback_alive_turtles, 10)
 
         # criar um publisher na /turtle1/cmd_vel para mover a turtle1
-        self.turtle1_cmd_vel_publisher_ = self.create_publisher(Twist, "/turtle1/cmd_vel", 10)
+        self.cmd_vel_publisher_ = self.create_publisher(Twist, "/turtle1/cmd_vel", 10)
 
         # criar um timer para o loop de controle
-        self.control_loop_timer_ = self.create_timer(0.01, self.control_loop_callback)
+        self.control_loop_timer_ = self.create_timer(0.01, self.control_loop)
+
+        # criar um cliente para o serviço /catch_turtle
+        self.catch_turtle_client_ = self.create_client(CatchTurtle, "catch_turtle")
 
         self.get_logger().info("Turtle Controller has been started!") # registrar uma mensagem de log
 
 
-    def callback_turtle1_pose(self, position: Pose):  # callback para a posição da turtle1
-       self.position_ = position  # atualizar a posição atual da turtle1
+    def callback_pose(self, pose: Pose): 
+        self.pose_ = pose # armazenar a posição atual da turtle1
 
+    def callback_alive_turtles(self, msg: TurtleArray): # processar a lista de tartarugas vivas recebida
+        if len(msg.turtles) > 0:
+            if self.catch_closest_turtle_first:
+                closest_turtle = None
+                closest_turtle_distance = None
 
-    def control_loop_callback(self): # callback do loop de controle
-        if self.position_ is None:
+                for turtle in msg.turtles: # encontrar a tartaruga mais próxima
+                    dist_x = turtle.x - self.pose_.x
+                    dist_y = turtle.y - self.pose_.y
+                    distance = sqrt(dist_x*dist_x + dist_y*dist_y) # calcular a distância até a tartaruga
+
+                    if closest_turtle is None or distance < closest_turtle_distance: # atualizar a tartaruga mais próxima
+                        closest_turtle = turtle
+                        closest_turtle_distance = distance
+                self.turtle_to_catch_ = closest_turtle # definir a tartaruga alvo como a mais próxima
+            else:
+                self.turtle_to_catch_ = msg.turtles[0] # definir a tartaruga alvo como a primeira da lista
+
+    def control_loop(self):
+        if self.pose_ == None or self.turtle_to_catch_ is None:
             return
 
-        # calcular a diferença entre a posição atual e a posição alvo
-        diff_x = self.target_x - self.position_.x
-        diff_y = self.target_y - self.position_.y
-        distance = sqrt(diff_x*diff_x + diff_y*diff_y)
+        dist_x = self.turtle_to_catch_.x - self.pose_.x
+        dist_y = self.turtle_to_catch_.y - self.pose_.y
+        distance = sqrt(dist_x*dist_x + dist_y*dist_y)
 
-        # calcular ângulo para o alvo
-        angle_to_target = atan2(diff_y, diff_x)
-        diff_angle = angle_to_target - self.position_.theta
+        goal_theta = atan2(dist_y, dist_x)
+        diff = goal_theta - self.pose_.theta
 
         # controlador proporcional simples
         K_linear = 2.0 
         K_angular = 6.0
 
-        cmd_vel_msg = Twist()
+        cmd = Twist()
 
         if distance > 0.5:
-
             # position
-            cmd_vel_msg.linear.x = K_linear*distance
+            cmd.linear.x = K_linear*distance
 
             # orientation
-            if diff_angle > pi:
-                diff_angle -= 2*pi
-            elif diff_angle < -pi:
-                diff_angle += 2*pi
+            if diff > pi:
+                diff -= 2*pi
+            elif diff < -pi:
+                diff += 2*pi
 
-            cmd_vel_msg.angular.z = K_angular*diff_angle
-        
+            cmd.angular.z = K_angular*diff
+             
         else:
             # target reached
-            cmd_vel_msg.linear.x = 0.0
-            cmd_vel_msg.angular.z = 0.0
+            cmd.linear.x = 0.0
+            cmd.angular.z = 0.0
+            # chamar o serviço de pegar tartaruga quando chegar perto o suficiente
+            self.call_catch_turtle_service(self.turtle_to_catch_.name) 
+            self.turtle_to_catch_ : Turtle = None  # resetar a tartaruga alvo após tentar pegar
 
-        # publicar a mensagem de velocidade para mover a turtle1
-        self.turtle1_cmd_vel_publisher_.publish(cmd_vel_msg)
+        self.cmd_vel_publisher_.publish(cmd)
 
+    def call_catch_turtle_service(self, turtle_name): # chamar o serviço de pegar tartaruga
+        while not self.catch_turtle_client_.wait_for_service(1.0):
+            self.get_logger().warn("Waiting for catch turtle service... ")
 
+        request = CatchTurtle.Request() # criar uma requisição para o serviço CatchTurtle
+        request.name = turtle_name      # definir o nome da tartaruga a ser pega
 
+        future = self.catch_turtle_client_.call_async(request)                                              # chamar o serviço de pegar tartaruga de forma assíncrona
+        future.add_done_callback(partial(self.callback_call_catch_turtle_service, turtle_name=turtle_name)) # adicionar um callback para processar a resposta do serviço
 
-
-
-
-
-
-
-
-
-        # # subscribe pro tópico /alive_turtles para saber a posição das outras tartarugas na tela
-        # self.alive_turtles_subscriber_ = self.create_subscription(TurtleArray, "/alive_turtles", self.callback_alive_turtles, 10)
-
-        # # Quando uma tartaruga for pega, chamar o serviço /catch_turtle avisado pelo nó turtle_spawner
-        # self.catch_turtle_client_ = self.create_client(CatchTurtle, "/catch_turtle")
-        # self.catch_turtle_request_ = CatchTurtle.Request()
-
-    
-
-
-
-
-
-    #     # linear_velocity = K_linear * distance
-    #     # angular_velocity = K_angular * error_theta
-
-    #     # # criar a mensagem de velocidade
-    #     # cmd_vel_msg = Twist()
-    #     # cmd_vel_msg.linear.x = linear_velocity
-    #     # cmd_vel_msg.angular.z = angular_velocity
-
-    #     # # publicar a mensagem de velocidade para mover a turtle1
-    #     # self.turtle1_cmd_vel_publisher_.publish(cmd_vel_msg)
-
-
-
-
-    #     # verificar se chegou perto da tartaruga alvo (capturou)
-    #     if distance < 0.5:
-    #         self._stop()
-    #         self.call_catch_turtle_service(self.target_position_.name)  # chamar serviço /catch_turtle
-    #         self.target_position_ = None                                # limpar o alvo após capturar
-
-
-
-    #         # self.call_catch_turtle_service(self.target_position_.name)
-    #         # self.target_position_ = None  # limpar o alvo após capturar
-
-
-    # def callback_turtle1_pose(self, msg: Pose): # callback para a posição da turtle1
-    #     self.position_ = msg  # atualizar a posição atual da turtle1
-
-    # def callback_alive_turtles(self, msg: TurtleArray):
-    #     if not msg.turtles:
-    #         self.target_position_ = None
-    #         return
-
-    #     # se já tenho alvo e ele ainda está na lista, mantenho
-    #     if self.target_position_:
-    #         names = [t.name for t in msg.turtles]
-    #         if self.target_position_.name in names:
-    #             return  # mantém alvo atual
-
-    #     # escolhe o mais próximo
-    #     closest = min(msg.turtles,key=lambda t: ((t.x - self.position_.x)**2 + (t.y - self.position_.y)**2)**0.5)
-    #     self.target_position_ = closest
-
-
-
-
-    # # def callback_alive_turtles(self, msg: TurtleArray): # callback para a lista de tartarugas vivas
-    # #     if not msg.turtles:
-    # #         self.target_position_ = None  # se não houver tartarugas vivas, não há alvo
-    # #         return
-
-    # #     # encontrar a tartaruga mais próxima
-    # #     closest_turtle = min(msg.turtles,key=lambda t: ((t.x - self.position_.x)**2 + (t.y - self.position_.y)**2)**0.5)
-        
-    # #     # armazenar a tartaruga alvo (incluindo o nome para captura)
-    # #     self.target_position_ = closest_turtle  # atualizar a posição alvo para a tartaruga mais próxima
-
-    # def call_catch_turtle_service(self, turtle_name): # chamar o serviço /catch_turtle
-    #     if not self.catch_turtle_client_.wait_for_service(timeout_sec=1.0):
-    #         self.get_logger().error("Service /catch_turtle not available")
-    #         return
-        
-    #     request = CatchTurtle.Request()
-    #     request.name = turtle_name
-        
-    #     future = self.catch_turtle_client_.call_async(request)
-    #     future.add_done_callback(self.catch_turtle_response_callback)
-    
-    # def catch_turtle_response_callback(self, future): # callback para a resposta do serviço /catch_turtle
-    #     try:
-    #         response = future.result()
-    #         if response.success:
-    #             self.get_logger().info(f"Successfully caught turtle: {response.message}")
-    #         else:
-    #             self.get_logger().error(f"Failed to catch turtle: {response.message}")
-    #     except Exception as e:
-    #         self.get_logger().error(f"Service call failed: {e}")
-
+    def callback_call_catch_turtle_service(self, future, turtle_name): # processar a resposta do serviço de pegar tartaruga
+        response = future.result()  # obter a resposta do serviço
+        if response.success:
+            self.get_logger().info(f"Turtle {turtle_name} caught successfully!")
+        else:
+            self.get_logger().info(f"Failed to catch turtle {turtle_name}.")
 
 
 def main(args=None):
@@ -206,6 +143,6 @@ def main(args=None):
     node = TurtleControllerNode() # instanciar o nó
     rclpy.spin(node) # manter o nó ativo para processar callbacks(até que se aperte Ctrl+C)
     rclpy.shutdown() # finalizar o rclpy
-#-----------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     main()

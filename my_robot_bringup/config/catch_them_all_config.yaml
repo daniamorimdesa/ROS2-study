@@ -1,0 +1,11 @@
+/turtle_spawner:
+  ros__parameters:
+    catch_closest_turtle_first: true  # Habilitar captura da tartaruga mais próxima
+    spawn_interval: 0.5               # Intervalo de spawn em segundos
+
+/turtle_controller:
+  ros__parameters:
+    turtle_name_prefix: "turtle"      # Prefixo do nome da tartaruga
+    spawn_frequency: 1.5              # Frequência de spawn em segundos
+    linear_speed: 2.0                 # Velocidade linear da tartaruga
+    angular_speed: 6.0                # Velocidade angular da tartaruga
