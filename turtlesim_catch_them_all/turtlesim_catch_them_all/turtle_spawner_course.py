@@ -2,9 +2,9 @@
 import rclpy
 from rclpy.node import Node
 from turtlesim.srv import Spawn  # importar o serviço Spawn do turtlesim
-from turtlesim.srv import Kill  # importar o serviço Kill do turtlesim
+from turtlesim.srv import Kill   # importar o serviço Kill do turtlesim
 from my_robot_interfaces.msg import TurtleArray, Turtle  # importar as mensagens personalizadas TurtleArray e Turtle
-from my_robot_interfaces.srv import CatchTurtle  # importar o serviço personalizado CatchTurtle
+from my_robot_interfaces.srv import CatchTurtle          # importar o serviço personalizado CatchTurtle
 from functools import partial
 from math import pi
 from random import uniform
@@ -15,13 +15,28 @@ class TurtleSpawnerNode(Node):
         super().__init__("turtle_spawner") # criar um nó chamado "turtle_spawner"
 
         self.turtle_name_prefix_ = "turtle"
-        self.turtle_counter_ = 1 # contador de tartarugas spawnadas
+        self.turtle_counter_ = 0 # contador de tartarugas spawnadas
         self.alive_turtles_ = [] # lista de tartarugas vivas
 
         self.alive_turtles_publisher_ = self.create_publisher(TurtleArray, "alive_turtles", 10) # criar um publisher para as tartarugas vivas
 
-        self.spawn_client_ = self.create_client(Spawn, "/spawn")                 # criar um cliente para o serviço /spawn
-        self.spawn_turtle_timer_ = self.create_timer(2.0, self.spawn_new_turtle) # criar um timer para spawnar tartarugas a cada 2 segundos
+        self.spawn_client_ = self.create_client(Spawn, "/spawn")   # criar um cliente para o serviço /spawn
+        self.kill_client_ = self.create_client(Kill, "/kill")      # criar um cliente para o serviço /kill
+
+        # criar um serviço para pegar tartarugas
+        self.catch_turtle_service_ = self.create_service(CatchTurtle, "catch_turtle", self.callback_catch_turtle) 
+
+        # criar um timer para spawnar tartarugas a cada 1 segundo
+        self.spawn_turtle_timer_ = self.create_timer(1.0, self.spawn_new_turtle)
+
+        self.get_logger().info("Turtle Spawner has been started!") # registrar uma mensagem de log
+
+    
+    def callback_catch_turtle(self, request: CatchTurtle.Request, response: CatchTurtle.Response):
+        # call kill service
+        self.call_kill_service(request.name)
+        response.success = True
+        return response
 
 
     def publish_alive_turtles(self): # publicar a lista de tartarugas vivas
@@ -53,7 +68,7 @@ class TurtleSpawnerNode(Node):
         future.add_done_callback(partial(self.callback_call_spawn_service, request=request)) # adicionar um callback para processar a resposta do serviço
 
     def callback_call_spawn_service(self, future, request: Spawn.Request):
-        response = Spawn.Response = future.result()                        # obter a resposta do serviço
+        response: Spawn.Response = future.result()                        # obter a resposta do serviço
         if response.name != "":                                            # se a tartaruga foi spawnada com sucesso
             self.get_logger().info(f"New alive turtle: {response.name}")
 
@@ -65,6 +80,23 @@ class TurtleSpawnerNode(Node):
             new_turtle.theta = request.theta
             self.alive_turtles_.append(new_turtle)
             self.publish_alive_turtles()  # publicar a lista atualizada de tartarugas vivas
+    
+    def call_kill_service(self, turtle_name): # chamar o serviço /kill
+        while not self.kill_client_.wait_for_service(1.0): # esperar até que o serviço esteja disponível
+            self.get_logger().warn("Waiting for kill service...")
+
+        request = Kill.Request()
+        request.name = turtle_name
+
+        future = self.kill_client_.call_async(request)
+        future.add_done_callback(partial(self.callback_call_kill_service, turtle_name=turtle_name))
+
+    def callback_call_kill_service(self, future, turtle_name):
+        for (i, turtle) in enumerate(self.alive_turtles_):
+            if turtle.name == turtle_name:
+                del self.alive_turtles_[i]
+                self.publish_alive_turtles()
+                break
 
 
     

@@ -22,7 +22,7 @@ class TurtleSpawnerNode(Node):
     def __init__(self):
         super().__init__("turtle_spawner") # criar um nó chamado "turtle_spawner"
         self.turtle_name_prefix_ = "turtle"
-        self.turtle_counter_ = 1 # contador de tartarugas spawnadas
+        self.turtle_counter_ = 0 # contador de tartarugas spawnadas
 
         self.spawn_client_ = self.create_client(Spawn, "/spawn") # criar um cliente para o serviço /spawn
         self.spawn_turtle_timer_ = self.create_timer(1.0, self.spawn_new_turtle) # criar um timer para spawnar tartarugas a cada 1 segundo

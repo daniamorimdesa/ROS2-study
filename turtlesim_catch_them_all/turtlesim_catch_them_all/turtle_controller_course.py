@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
+from math import sqrt, atan2, pi
+from functools import partial
 import rclpy
 from rclpy.node import Node
 from turtlesim.msg import Pose
 from geometry_msgs.msg import Twist
-from math import sqrt, atan2, pi
 from my_robot_interfaces.msg import Turtle
 from my_robot_interfaces.msg import TurtleArray
-# from my_robot_interfaces.srv import CatchTurtle
+from my_robot_interfaces.srv import CatchTurtle
 
 class TurtleControllerNode(Node):
 
@@ -27,6 +28,11 @@ class TurtleControllerNode(Node):
 
         # criar um timer para o loop de controle
         self.control_loop_timer_ = self.create_timer(0.01, self.control_loop)
+
+        # criar um cliente para o serviço /catch_turtle
+        self.catch_turtle_client_ = self.create_client(CatchTurtle, "catch_turtle")
+
+        self.get_logger().info("Turtle Controller has been started!") # registrar uma mensagem de log
 
 
     def callback_pose(self, pose: Pose): 
@@ -61,7 +67,7 @@ class TurtleControllerNode(Node):
             if diff > pi:
                 diff -= 2*pi
             elif diff < -pi:
-                diff +- 2*pi
+                diff += 2*pi
 
             cmd.angular.z = K_angular*diff
              
@@ -69,10 +75,29 @@ class TurtleControllerNode(Node):
             # target reached
             cmd.linear.x = 0.0
             cmd.angular.z = 0.0
+            # chamar o serviço de pegar tartaruga quando chegar perto o suficiente
+            self.call_catch_turtle_service(self.turtle_to_catch_.name) 
+            self.turtle_to_catch_ : Turtle = None  # resetar a tartaruga alvo após tentar pegar
 
         self.cmd_vel_publisher_.publish(cmd)
 
-        
+    def call_catch_turtle_service(self, turtle_name): # chamar o serviço de pegar tartaruga
+        while not self.catch_turtle_client_.wait_for_service(1.0):
+            self.get_logger().warn("Waiting for catch turtle service... ")
+
+        request = CatchTurtle.Request() # criar uma requisição para o serviço CatchTurtle
+        request.name = turtle_name      # definir o nome da tartaruga a ser pega
+
+        future = self.catch_turtle_client_.call_async(request)                                              # chamar o serviço de pegar tartaruga de forma assíncrona
+        future.add_done_callback(partial(self.callback_call_catch_turtle_service, turtle_name=turtle_name)) # adicionar um callback para processar a resposta do serviço
+
+    def callback_call_catch_turtle_service(self, future, turtle_name): # processar a resposta do serviço de pegar tartaruga
+        response = future.result()  # obter a resposta do serviço
+        if response.success:
+            self.get_logger().info(f"Turtle {turtle_name} caught successfully!")
+        else:
+            self.get_logger().info(f"Failed to catch turtle {turtle_name}.")
+
 
 def main(args=None):
     rclpy.init(args=args) # inicializar o rclpy
