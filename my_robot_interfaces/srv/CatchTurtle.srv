@@ -1,0 +1,5 @@
+# CatchTurtle.srv: service to send the name of the turtle which was caught.
+# The client will be the turtle_controller node and the server will be the turtle_spawner node
+string turtle_name
+---
+bool success

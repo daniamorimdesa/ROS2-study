@@ -19,6 +19,7 @@ class AddTwoIntsClient(Node):
         request.b = b
 
         future = self.client_.call_async(request) # chamar o serviço de forma assíncrona
+        
         # adicionar uma função de callback para processar a resposta quando estiver pronta
         #future.add_done_callback(self.callback_call_add_two_ints) 
         # se quiser passar argumentos adicionais para o callback, use partial
