@@ -1,3 +1,76 @@
+# ROS2 Study Workspace
+
+## Como escrever e rodar programas com ROS2
+
+### 1. Criar uma workspace do ROS2 na home directory (exemplo):
+
+```bash
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws
+```
+
+### 2. Criar um package Python dentro da workspace (exemplo):
+
+Entrar na pasta:
+```bash
+cd ~/ros2_ws/src
+```
+
+Criar o package:
+```bash
+ros2 pkg create my_py_pkg --build-type ament_python --dependencies rclpy
+```
+
+### 3. Abrir o VS Code a partir da pasta src
+
+```bash
+cd ~/ros2_ws/src
+code .
+```
+
+### 4. Sempre buildar a partir do workspace
+
+Voltar para o workspace:
+```bash
+cd ~/ros2_ws
+colcon build
+source install/setup.bash
+```
+
+### 5. Para buildar apenas um package específico
+
+```bash
+cd ~/ros2_ws
+colcon build --packages-select my_py_pkg
+source install/setup.bash
+```
+
+### 6. Escrever um node, configurar, compilar e rodar
+
+Criar o arquivo do node:
+```bash
+cd ~/ros2_ws/src/my_py_pkg/my_py_pkg
+touch meu_node.py
+chmod +x meu_node.py
+```
+
+Após escrever o código, compilar:
+```bash
+cd ~/ros2_ws
+colcon build --packages-select my_py_pkg
+source install/setup.bash
+```
+
+Rodar o node:
+```bash
+ros2 run my_py_pkg meu_node
+```
+
+Detalhes completos abaixo ⬇️
+
+---
+
+
 # Guia rápido: Criar um Node Python no ROS2
 
 ## 1. Criar o arquivo do node
