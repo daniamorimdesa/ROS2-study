@@ -6,6 +6,9 @@
 
 ```bash
 mkdir -p ~/ros2_ws/src
+```
+Entrar nela:
+```bash
 cd ~/ros2_ws
 ```
 
@@ -25,6 +28,8 @@ ros2 pkg create my_py_pkg --build-type ament_python --dependencies rclpy
 
 ```bash
 cd ~/ros2_ws/src
+```
+```bash
 code .
 ```
 
@@ -33,7 +38,11 @@ code .
 Voltar para o workspace:
 ```bash
 cd ~/ros2_ws
+```
+```bash
 colcon build
+```
+```bash
 source install/setup.bash
 ```
 
@@ -41,7 +50,13 @@ source install/setup.bash
 
 ```bash
 cd ~/ros2_ws
+```
+
+```bash
 colcon build --packages-select my_py_pkg
+```
+
+```bash
 source install/setup.bash
 ```
 
@@ -50,14 +65,26 @@ source install/setup.bash
 Criar o arquivo do node:
 ```bash
 cd ~/ros2_ws/src/my_py_pkg/my_py_pkg
+```
+
+```bash
 touch meu_node.py
+```
+
+```bash
 chmod +x meu_node.py
 ```
 
 Após escrever o código, compilar:
 ```bash
 cd ~/ros2_ws
+```
+
+```bash
 colcon build --packages-select my_py_pkg
+```
+
+```bash
 source install/setup.bash
 ```
 
@@ -69,7 +96,6 @@ ros2 run my_py_pkg meu_node
 Detalhes completos abaixo ⬇️
 
 ---
-
 
 # Guia rápido: Criar um Node Python no ROS2
 
