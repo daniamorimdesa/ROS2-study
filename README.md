@@ -265,3 +265,8 @@ ros2 interface show geometry_msgs/msg/Twist
 ```bash
 ros2 topic pub -r 2 /turtle1/cmd_vel geometry_msgs/msg/Twist "{linear: {x: 1.0}, angular: {z: 1.0}}"
 ```
+
+>**Nesse exemplo:**
+
+publica mensagens no tópico /turtle1/cmd_vel com o tipo Twist, definindo velocidades linear e angular da tartaruga.
+A opção **-r 2** define a frequência de publicação: 2 significa 2 Hz, ou seja, duas mensagens por segundo (sem essa opção, o comando publica apenas uma única mensagem).
