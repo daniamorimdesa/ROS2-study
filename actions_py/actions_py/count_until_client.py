@@ -2,8 +2,10 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionClient
-from rclpy.action.client import ClientGoalHandle
+from rclpy.action.client import ClientGoalHandle, GoalStatus
 from my_robot_interfaces.action import CountUntil
+
+
 
 class CountUntilClientNode(Node):
 
@@ -26,7 +28,18 @@ class CountUntilClientNode(Node):
         # enviar a meta(send the goal)
         self.get_logger().info("Sending goal...")
         # adicionar um callback para processar a resposta do servidor de ação
-        self.count_until_client_.send_goal_async(goal).add_done_callback(self.goal_response_callback) 
+        self.count_until_client_.send_goal_async(goal, feedback_callback=self.goal_feedback_callback).add_done_callback(self.goal_response_callback) 
+
+        # mandar uma request de cancelamento após 2 segundos(send a cancel request 2 seconds later)
+        # essa é uma forma de testar a função(cancelamento) usando um timer
+        # self.timer_ = self.create_timer(2.0, self.cancel_goal)
+
+    # enviar uma request de cancelamento
+    def cancel_goal(self): 
+        self.get_logger().info("Send a cancel request")
+        self.goal_handle_.cancel_goal_async() # enviar a request de cancelamento
+        self.timer_.cancel()
+
 
     # processar a resposta do servidor de ação
     def goal_response_callback(self, future): 
@@ -41,9 +54,22 @@ class CountUntilClientNode(Node):
 
     # processar o resultado da meta
     def goal_result_callback(self, future): 
+        status = future.result(). status
         result = future.result().result                                 # obter o resultado da meta
+        if status == GoalStatus.STATUS_SUCCEEDED:                       # verificar se a meta foi sucedida
+            self.get_logger().info("Success!")                          # log de sucesso
+        elif status == GoalStatus.STATUS_ABORTED:                       # verificar se a meta foi abortada
+            self.get_logger().error("Aborted!")                         # log de aborto
+        elif status == GoalStatus.STATUS_CANCELED:                      # verificar se a meta foi cancelada
+            self.get_logger().warn("Canceled!")                        # log de cancelamento
+
         self.get_logger().info(f"Result: {str(result.reached_number)}") # exibir o número alcançado
 
+
+    # processar o feedback do servidor de ação
+    def goal_feedback_callback(self, feedback_msg): 
+        number = feedback_msg.feedback.current_number          # obter o número atual do feedback
+        self.get_logger().info(f"Got feedback: {str(number)}") # log do feedback recebido
 
 
 def main(args=None):
