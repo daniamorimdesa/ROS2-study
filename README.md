@@ -265,3 +265,22 @@ ros2 interface show geometry_msgs/msg/Twist
 ```bash
 ros2 topic pub -r 2 /turtle1/cmd_vel geometry_msgs/msg/Twist "{linear: {x: 1.0}, angular: {z: 1.0}}"
 ```
+
+>**Nesse exemplo:**
+
+publica mensagens no tópico /turtle1/cmd_vel com o tipo Twist, definindo velocidades linear e angular da tartaruga.
+A opção **-r 2** define a frequência de publicação: 2 significa 2 Hz, ou seja, duas mensagens por segundo (sem essa opção, o comando publica apenas uma única mensagem).
+
+**Para publicar apenas uma vez:**
+
+```bash
+ros2 topic pub --once /turtle1/cmd_vel geometry_msgs/msg/Twist "{linear: {x: 1.0}, angular: {z: 1.0}}"
+```
+**Sem --once, mas também sem -r:**
+
+O ROS 2 entra no modo interativo, esperando você pressionar Enter para cada mensagem.
+Ou seja, ele pode enviar várias, mas não envia continuamente sozinho.
+
+```bash
+ros2 topic pub /turtle1/cmd_vel geometry_msgs/msg/Twist "{linear: {x: 1.0}, angular: {z: 1.0}}"
+```
