@@ -46,7 +46,7 @@ class MoveRobotServerNode(Node):
 
             else:
                 if abs(diff) >= velocity:
-                    self.robot_position_ = velocity
+                    self.robot_position_ -= velocity
                 else:
                     self.robot_position_ -= abs(diff)
 
