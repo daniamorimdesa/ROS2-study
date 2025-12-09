@@ -55,8 +55,8 @@ class NumberPublisherNode(LifecycleNode):
         self.destroy_timer(self.number_timer_)                   # destruir o timer
         self.destroy_lifecycle_publisher(self.number_publisher_) # destruir o publicador
         
-        self.number_timer_ = None                                # limpar a referência do timer
-        self.number_publisher_ = None                            # limpar a referência do publicador
+        # self.number_timer_ = None                                # limpar a referência do timer
+        # self.number_publisher_ = None                            # limpar a referência do publicador
 
         return TransitionCallbackReturn.SUCCESS                  # indicar que a limpeza foi bem-sucedida
     
@@ -66,8 +66,8 @@ class NumberPublisherNode(LifecycleNode):
         self.destroy_timer(self.number_timer_)                   # destruir o timer
         self.destroy_lifecycle_publisher(self.number_publisher_) # destruir o publicador
         
-        self.number_timer_ = None                                # limpar a referência do timer
-        self.number_publisher_ = None                            # limpar a referência do publicador
+        # self.number_timer_ = None                                # limpar a referência do timer
+        # self.number_publisher_ = None                            # limpar a referência do publicador
 
         return TransitionCallbackReturn.SUCCESS                  # indicar que a limpeza foi bem-sucedida
     
