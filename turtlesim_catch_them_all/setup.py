@@ -28,6 +28,10 @@ setup(
             "turtle_spawner = turtlesim_catch_them_all.turtle_spawner:main",
             "turtle_controller_course = turtlesim_catch_them_all.turtle_controller_course:main",
             "turtle_spawner_course = turtlesim_catch_them_all.turtle_spawner_course:main",
+            "turtle_pose_robotica = turtlesim_catch_them_all.turtle_pose_robotica:main",
+            "tiago = turtlesim_catch_them_all.tiago:main",
+            "tiago2 = turtlesim_catch_them_all.tiago2:main",
+            "laser_tiago = turtlesim_catch_them_all.laser_tiago:main",
         ],
     },
 )

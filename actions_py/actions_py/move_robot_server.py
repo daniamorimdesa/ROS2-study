@@ -38,9 +38,10 @@ class MoveRobotServerNode(Node):
             return GoalResponse.REJECT
         
         # New goal is valid, abort current goal and accept new goal
-        if self.goal_handle_ is not None and self.goal_handle_.is_active:
-            self.get_logger().info("Aborting current goal...")
-            self.goal_handle_.abort()
+        with self.goal_lock_:
+            if self.goal_handle_ is not None and self.goal_handle_.is_active:
+                self.get_logger().info("Aborting current goal...")
+                self.goal_handle_.abort()
         
         self.get_logger().info("Accepting goal")
         return GoalResponse.ACCEPT
@@ -113,7 +114,7 @@ class MoveRobotServerNode(Node):
 def main(args=None):
     rclpy.init(args=args) # inicializar o rclpy
     node = MoveRobotServerNode() # instanciar o nó
-    rclpy.spin(node, executor=MultiThreadedExecutor()) # manter o nó ativo para processar callbacks(até que se aperte Ctrl+C)
+    rclpy.spin(node, executor=MultiThreadedExecutor()) # manter o nó ativo 
     rclpy.shutdown() # finalizar o rclpy
 #-----------------------------------------------------------------------------------------------
 if __name__ == "__main__":

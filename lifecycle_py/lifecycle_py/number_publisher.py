@@ -54,9 +54,6 @@ class NumberPublisherNode(LifecycleNode):
 
         self.destroy_timer(self.number_timer_)                   # destruir o timer
         self.destroy_lifecycle_publisher(self.number_publisher_) # destruir o publicador
-        
-        # self.number_timer_ = None                                # limpar a referência do timer
-        # self.number_publisher_ = None                            # limpar a referência do publicador
 
         return TransitionCallbackReturn.SUCCESS                  # indicar que a limpeza foi bem-sucedida
     
@@ -65,11 +62,21 @@ class NumberPublisherNode(LifecycleNode):
 
         self.destroy_timer(self.number_timer_)                   # destruir o timer
         self.destroy_lifecycle_publisher(self.number_publisher_) # destruir o publicador
-        
-        # self.number_timer_ = None                                # limpar a referência do timer
-        # self.number_publisher_ = None                            # limpar a referência do publicador
 
         return TransitionCallbackReturn.SUCCESS                  # indicar que a limpeza foi bem-sucedida
+    
+    # Processar erros, desativar+cleanup (process errors, deactivate + cleanup)
+    def on_error(self, previous_state: LifecycleNode):
+        self.get_logger().info("In on_error...") 
+
+        self.destroy_timer(self.number_timer_)                   # destruir o timer
+        self.destroy_lifecycle_publisher(self.number_publisher_) # destruir o publicador
+
+        # fazer algumas verificações, se ok retornar SUCCESS, se não retornar FAILURE
+        # (do some checks, if ok, then return SUCCESS, if not FAILURE)
+
+        return TransitionCallbackReturn.SUCCESS                  # indicar que a limpeza foi bem-sucedida
+
     
     # publicar o número atual (callback do timer)
     def publish_number(self): 
