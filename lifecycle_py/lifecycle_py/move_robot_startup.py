@@ -20,23 +20,23 @@ class MoveRobotStartUp(Node):
         node_name_list = self.get_parameter("managed_node_names").value                  # obter o valor do parâmetro
 
         # imprimir nomes
-        self.get_logger().info(f"Managed node names: {node_name_list}")
+        self.get_logger().info(f"Managed node names: {str(node_name_list)}")
 
-        self.client_list = []
+        self.client_list = [] # lista de clientes do serviço de mudança de estado
+
         for node_name in node_name_list:
-            service_change_state_name = "/" + node_name + "/change_state"                # construir o nome do serviço de mudança de estado
-            client = self.create_client(ChangeState, service_change_state_name)          # criar o cliente do serviço de mudança de estado
-            self.client_list.append((node_name, client))                                 # armazenar o cliente na lista com o nome do nó
+            service_change_state_name = "/" + node_name + "/change_state"                        # construir o nome do serviço de mudança de estado
+            self.client_list.append(self.create_client(ChangeState, service_change_state_name))  # criar o cliente do serviço de mudança de estado
 
 
     # enviar a requisição de mudança de estado
     def change_state(self, transition: Transition): 
-        for node_name, client in self.client_list:
-            client.wait_for_service()                          # esperar o serviço estar disponível
-            request = ChangeState.Request()                    # criar a requisição
-            request.transition = transition                    # definir a transição desejada
-            future = client.call_async(request)                # chamar o serviço de forma assíncrona
-            rclpy.spin_until_future_complete(self, future)     # esperar a resposta
+            for client in self.client_list:
+                client.wait_for_service()                          # esperar o serviço estar disponível
+                request = ChangeState.Request()                    # criar a requisição
+                request.transition = transition                    # definir a transição desejada
+                future = client.call_async(request)                # chamar o serviço de forma assíncrona
+                rclpy.spin_until_future_complete(self, future)     # esperar a resposta
    
     # realizar a sequência de inicialização do nó gerenciado
     def initialization_sequence(self): 
