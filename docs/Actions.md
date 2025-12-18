@@ -45,6 +45,21 @@ Uma Action envolve dois componentes principais:
 
 ## Ciclo de Vida de uma Action
 
+![Action Client-Server Communication](images/action-client-server-communication.png)
+
+A comunicação entre Action Client e Action Server segue o seguinte fluxo:
+
+1. **Send Goal** → Cliente envia o objetivo para o servidor
+2. **Goal accepted or rejected** ← Servidor decide se aceita ou rejeita
+3. **Cancel Goal request** → (Opcional) Cliente pode cancelar a execução
+4. **Response code** ← Servidor confirma o cancelamento
+5. **Feedback** ← Servidor envia progresso periodicamente
+6. **Goal Status** ← Servidor publica o status atual do goal
+7. **Request result** → Cliente requisita o resultado final
+8. **Result** ← Servidor retorna o resultado
+
+### Diagrama Sequencial Detalhado
+
 ```
 Action Client                    Action Server
      |                                 |
@@ -238,6 +253,132 @@ if __name__ == "__main__":
     main()
 ```
 
+### Máquina de Estados do Goal
+
+![Goal State Machine](images/goal-state-machine.png)
+
+O ciclo de vida de um goal no servidor segue uma máquina de estados bem definida:
+
+**Estados Ativos (Active States):**
+- **ACCEPTED** - Goal foi aceito e aguardando execução
+- **EXECUTING** - Goal está sendo executado atualmente
+- **CANCELING** - Goal está sendo cancelado
+
+**Estados Terminais (Terminal States):**
+- **SUCCEEDED** - Goal foi concluído com sucesso
+- **CANCELED** - Goal foi cancelado com sucesso
+- **ABORTED** - Goal foi abortado (erro ou nova goal com preempt)
+
+**Transições:**
+- `send_goal (accepted)` → ACCEPTED
+- `execute` → EXECUTING
+- `succeed` → SUCCEEDED
+- `cancel_goal (accepted)` → CANCELING (de ACCEPTED ou EXECUTING)
+- `canceled` → CANCELED
+- `abort` → ABORTED
+
+### Cancelamento vs Abort: Qual a diferença?
+
+É importante entender a diferença entre **cancelar** e **abortar** um goal:
+
+#### **Cancelamento (Cancel)**
+- **Iniciado pelo Cliente**: O cliente requisita explicitamente o cancelamento
+- **Controlado**: O servidor tem controle sobre quando e como parar
+- **Transição**: EXECUTING → CANCELING → CANCELED
+- **Resultado parcial**: Pode retornar um resultado parcial útil
+- **Exemplo**: Usuário clica em "parar" na interface
+
+```python
+def execute_callback(self, goal_handle):
+    for i in range(1, target + 1):
+        # Verificar se o cliente pediu cancelamento
+        if goal_handle.is_cancel_requested:
+            goal_handle.canceled()  # Transição para CANCELED
+            result.reached_number = i - 1  # Resultado parcial
+            self.get_logger().info("Goal canceled by client")
+            return result
+        
+        # ... continuar execução
+```
+
+#### **Abort (Abortar)**
+- **Iniciado pelo Servidor**: O servidor decide abortar devido a erro ou condição inválida
+- **Não esperado**: Geralmente indica falha ou problema
+- **Transição**: EXECUTING → ABORTED
+- **Erro**: Indica que algo deu errado
+- **Exemplo**: Hardware falhou, parâmetros inválidos, timeout, nova goal com preempt
+
+```python
+def execute_callback(self, goal_handle):
+    for i in range(1, target + 1):
+        # Verificar condição de erro
+        if self.battery_level < 10:
+            goal_handle.abort()  # Transição para ABORTED
+            result.reached_number = i - 1
+            self.get_logger().error("Goal aborted: low battery!")
+            return result
+        
+        # Verificar se hardware ainda está respondendo
+        if not self.is_hardware_connected():
+            goal_handle.abort()
+            self.get_logger().error("Goal aborted: hardware disconnected!")
+            return result
+        
+        # ... continuar execução
+```
+
+#### **Exemplo Completo: Tratamento de Cancelamento e Abort**
+
+```python
+def execute_callback(self, goal_handle: ServerGoalHandle):
+    """Executa com tratamento de cancel e abort"""
+    target = goal_handle.request.target_number
+    
+    feedback = CountUntil.Feedback()
+    result = CountUntil.Result()
+    
+    for i in range(1, target + 1):
+        # 1. Verificar CANCELAMENTO (requisição do cliente)
+        if goal_handle.is_cancel_requested:
+            goal_handle.canceled()
+            result.reached_number = i - 1
+            self.get_logger().warn(f"Goal canceled at {i}")
+            return result
+        
+        # 2. Verificar condições de ABORT (erro do servidor)
+        if not self.check_system_health():
+            goal_handle.abort()
+            result.reached_number = i - 1
+            self.get_logger().error("Goal aborted: system error!")
+            return result
+        
+        # 3. Execução normal
+        feedback.current_number = i
+        goal_handle.publish_feedback(feedback)
+        time.sleep(1.0)
+    
+    # 4. Sucesso
+    goal_handle.succeed()
+    result.reached_number = target
+    return result
+
+def check_system_health(self):
+    """Verifica se o sistema está saudável"""
+    # Exemplo: verificar bateria, temperatura, conectividade, etc.
+    return True  # ou False se houver problema
+```
+
+#### **Comparação Rápida**
+
+| Aspecto | Cancel | Abort |
+|---------|--------|-------|
+| **Iniciado por** | Cliente | Servidor |
+| **Motivo** | Usuário mudou de ideia | Erro ou falha |
+| **Método** | `goal_handle.canceled()` | `goal_handle.abort()` |
+| **Estado final** | CANCELED | ABORTED |
+| **Resultado** | Opcional, parcial válido | Opcional, indica erro |
+| **Quando usar** | Requisição explícita do usuário | Condições de erro internas |
+
 ### Executar o servidor
 
 ```bash
@@ -377,6 +518,10 @@ ros2 service list --include-hidden-services
 ## Políticas de Goals (Goal Policies)
 
 Quando o servidor recebe múltiplos goals, é preciso definir como tratá-los:
+
+![Multiple Action Clients](images/multiple-action-clients.png)
+
+Um Action Server pode receber goals de múltiplos clientes simultaneamente, e até mesmo múltiplos goals do mesmo cliente. A forma como o servidor trata esses goals depende da política implementada.
 
 ### 1. **Multiple Goals in Parallel**
 Aceitar e executar múltiplos goals simultaneamente.
@@ -581,9 +726,3 @@ class MoveRobotServer(Node):
 6. ✅ Trate **exceções** no execute_callback
 7. ✅ Teste com múltiplos clientes se necessário
 
----
-
-## Referências
-
-- [ROS 2 Actions Tutorial](https://docs.ros.org/en/humble/Tutorials/Intermediate/Writing-an-Action-Server-Client.html)
-- [Action Design](https://design.ros2.org/articles/actions.html)
