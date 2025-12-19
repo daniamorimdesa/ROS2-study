@@ -878,8 +878,4 @@ def main(args=None):
 
 - [Documentação de Executors do ROS2](https://docs.ros.org/en/humble/Concepts/About-Executors.html)
 - [Callback Groups do ROS2](https://docs.ros.org/en/humble/How-To-Guides/Using-callback-groups.html)
-- [Threading no ROS2](https://docs.ros.org/en/humble/Concepts/About-Different-Middleware-Vendors.html)
 
----
-
-*Esta documentação foi criada como parte do repositório ROS2-study. Para mais informações, veja os outros arquivos de documentação no diretório `docs/`.*
