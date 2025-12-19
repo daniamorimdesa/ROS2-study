@@ -18,6 +18,21 @@
 - Sistemas de visão: carregar modelos → configurar câmera → iniciar detecção
 - Manipuladores: home position → check sensors → enable motors
 
+### Exemplo Prático: Camera Driver Node
+
+![Lifecycle Camera Example](images/lifecycle-nodes-camera-example.png)
+
+Considere um nó que controla uma câmera:
+
+1. **Unconfigured** → Nó existe mas câmera não está inicializada
+2. **Configure** → Conecta à câmera, aloca buffer de imagens, cria publisher
+3. **Inactive** → Câmera conectada mas não capturando imagens
+4. **Activate** → Inicia captura e publicação de imagens
+5. **Active** → Publicando imagens continuamente
+6. **Deactivate** → Para captura mas mantém conexão
+7. **Cleanup** → Desconecta câmera, libera buffers
+8. **Shutdown** → Finaliza completamente
+
 ---
 
 ## Estados do Lifecycle Node
@@ -91,7 +106,17 @@ Durante as mudanças de estado, o nó passa por estados intermediários:
 
 ---
 
-## Diagrama de Estados Completo
+## Diagramas de Estados
+
+### Máquina de Estados (ROS 2 Documentation)
+
+![Lifecycle State Machine ROS2](images/life_cycle_sm_rso2_documentation.png)
+
+### Máquina de Estados Detalhada
+
+![Lifecycle State Machine](images/lifecycle-nodes-state-machine.png)
+
+### Diagrama ASCII Completo
 
 ```
                     ┌───────────────────┐
@@ -160,6 +185,33 @@ Durante as mudanças de estado, o nó passa por estados intermediários:
 
 ### De Finalized:
 - Nenhuma (estado terminal)
+
+---
+
+## Transições Passo a Passo (Visualização)
+
+### 1. Configurar Node (Unconfigured → Inactive)
+
+![Configurar Node](images/lifecycle-sm-1-configurar-node.png)
+
+### 2. Ativar Node (Inactive → Active)
+
+![Ativar Node](images/lifecycle-sm-2-ativar-node.png)
+
+![Ativar Node](images/lifecycle-sm-2-ativar-node-2.png)
+
+
+### 3. Desativar Node (Active → Inactive)
+
+![Desativar Node](images/lifecycle-sm-3-desativar-node.png)
+
+### 4. Limpar Node (Inactive → Unconfigured)
+
+![Limpar Node](images/lifecycle-sm-4-limpar-node.png)
+
+### 5. Desligar Node (Qualquer → Finalized)
+
+![Desligar Node](images/lifecycle-sm-5-desligar-node.png)
 
 ---
 
@@ -806,8 +858,19 @@ def on_shutdown(self, state):
 
 ---
 
-## Referências
+## Imagens
 
-- [ROS 2 Managed Nodes](https://design.ros2.org/articles/node_lifecycle.html)
-- [Lifecycle Package Documentation](https://github.com/ros2/demos/tree/humble/lifecycle)
-- [rclpy Lifecycle API](https://docs.ros2.org/latest/api/rclpy/api/lifecycle.html)
+Esta documentação utiliza as seguintes imagens da pasta `docs/images/`:
+
+### Imagens Principais:
+- ✅ `lifecycle-nodes-camera-example.png` - Exemplo prático com camera driver
+- ✅ `life_cycle_sm_rso2_documentation.png` - Diagrama oficial da documentação ROS2
+- ✅ `lifecycle-nodes-state-machine.png` - Máquina de estados detalhada
+
+### Transições Passo a Passo:
+- ✅ `lifecycle-sm-1-configurar-node.png` - Unconfigured → Inactive
+- ✅ `lifecycle-sm-2-ativar-node.png` - Inactive → Active
+- ✅ `lifecycle-sm-3-desativar-node.png` - Active → Inactive
+- ✅ `lifecycle-sm-4-limpar-node.png` - Inactive → Unconfigured
+- ✅ `lifecycle-sm-5-desligar-node.png` - Qualquer estado → Finalized
+
