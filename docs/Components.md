@@ -587,9 +587,9 @@ ros2 launch my_package component_launch.py
 │                  Single Process                       │
 │  ┌─────────────────────────────────────────────────┐  │
 │  │           Executor (SingleThreaded)             │  │
-│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐         │  │
-│  │  │ Node 1  │  │ Node 2  │  │ Node 3  │         │  │
-│  │  └─────────┘  └─────────┘  └─────────┘         │  │
+│  │  ┌─────────┐  ┌─────────┐  ┌─────────┐          │  │
+│  │  │ Node 1  │  │ Node 2  │  │ Node 3  │          │  │
+│  │  └─────────┘  └─────────┘  └─────────┘          │  │
 │  └─────────────────────────────────────────────────┘  │
 │           Intra-Process Communication                 │
 │              (Zero-copy, sem serialização)            │
@@ -916,8 +916,3 @@ ros2 component unload /ComponentManager <component_id>
 
 - [ROS2 Composition Documentation](https://docs.ros.org/en/humble/Tutorials/Intermediate/Composition.html)
 - [Intra-Process Communication](https://docs.ros.org/en/humble/Tutorials/Demos/Intra-Process-Communication.html)
-- [Component Architecture Design](https://design.ros2.org/articles/composition.html)
-
----
-
-*Esta documentação foi criada como parte do repositório ROS2-study. Para mais informações, veja os outros arquivos de documentação no diretório `docs/`.*
