@@ -35,42 +35,15 @@ Considere um nó que controla uma câmera:
 
 ---
 
-## Estados do Lifecycle Node
+## Máquina de Estados do Lifecycle Node
+
+![Lifecycle State Machine](images/lifecycle-nodes-state-machine.png)
 
 Um lifecycle node possui **4 estados primários** e **4 estados de transição**:
 
 ### Estados Primários (Primary States)
 
-```
-┌─────────────┐
-│ Unconfigured│ ◄─── Estado inicial
-└──────┬──────┘
-       │ configure
-       ▼
-┌─────────────┐
-│  Inactive   │ ◄─── Configurado mas não ativo
-└──────┬──────┘
-       │ activate
-       ▼
-┌─────────────┐
-│   Active    │ ◄─── Executando normalmente
-└──────┬──────┘
-       │ deactivate
-       ▼
-┌─────────────┐
-│  Inactive   │
-└──────┬──────┘
-       │ cleanup
-       ▼
-┌─────────────┐
-│ Unconfigured│
-└─────────────┘
-       │ shutdown
-       ▼
-┌─────────────┐
-│  Finalized  │ ◄─── Estado final (não pode sair)
-└─────────────┘
-```
+
 
 #### 1. **Unconfigured** (Não Configurado)
 - Estado inicial após o nó ser criado
@@ -106,65 +79,10 @@ Durante as mudanças de estado, o nó passa por estados intermediários:
 
 ---
 
-## Diagramas de Estados
 
-### Máquina de Estados (ROS 2 Documentation)
+## Máquina de Estados (ROS 2 Documentation)
 
 ![Lifecycle State Machine ROS2](images/life_cycle_sm_rso2_documentation.png)
-
-### Máquina de Estados Detalhada
-
-![Lifecycle State Machine](images/lifecycle-nodes-state-machine.png)
-
-### Diagrama ASCII Completo
-
-```
-                    ┌───────────────────┐
-                    │   Unconfigured    │◄──── Estado inicial
-                    └─────────┬─────────┘
-                              │
-                    ┌─────────▼─────────┐
-                    │   on_configure()  │
-                    │   (Configuring)   │
-                    └─────────┬─────────┘
-                              │
-                    ┌─────────▼─────────┐
-                    │     Inactive      │
-                    └───┬───────────┬───┘
-                        │           │
-              activate  │           │  cleanup
-                        │           │
-            ┌───────────▼───┐   ┌───▼──────────┐
-            │ on_activate() │   │ on_cleanup() │
-            │ (Activating)  │   │(CleaningUp)  │
-            └───────┬───────┘   └───┬──────────┘
-                    │               │
-            ┌───────▼───────┐       │
-            │    Active     │       │
-            └───────┬───────┘       │
-                    │               │
-          deactivate│               │
-                    │               │
-        ┌───────────▼─────┐         │
-        │ on_deactivate() │         │
-        │ (Deactivating)  │         │
-        └───────┬─────────┘         │
-                │                   │
-                └───────┬───────────┘
-                        │
-              ┌─────────▼──────────┐
-              │   Unconfigured     │
-              └─────────┬──────────┘
-                        │ shutdown (de qualquer estado)
-              ┌─────────▼──────────┐
-              │  on_shutdown()     │
-              │  (ShuttingDown)    │
-              └─────────┬──────────┘
-                        │
-              ┌─────────▼──────────┐
-              │    Finalized       │◄──── Estado final
-              └────────────────────┘
-```
 
 ---
 
@@ -188,7 +106,7 @@ Durante as mudanças de estado, o nó passa por estados intermediários:
 
 ---
 
-## Transições Passo a Passo (Visualização)
+## Transições Passo a Passo (Exemplo da câmera)
 
 ### 1. Configurar Node (Unconfigured → Inactive)
 
