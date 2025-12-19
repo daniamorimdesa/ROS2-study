@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'turtlesim_catch_them_all'
+package_name = 'tiago_examples'
 
 setup(
     name=package_name,
@@ -15,8 +15,8 @@ setup(
     zip_safe=True,
     maintainer='das9',
     maintainer_email='daniela.amorimdesa@gmail.com',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    description='Exemplos de código para o robô TIAgo desenvolvidos em sala de aula',
+    license='Apache-2.0',
     extras_require={
         'test': [
             'pytest',
@@ -24,11 +24,9 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            "turtle_controller = turtlesim_catch_them_all.turtle_controller:main",
-            "turtle_spawner = turtlesim_catch_them_all.turtle_spawner:main",
-            "turtle_controller_course = turtlesim_catch_them_all.turtle_controller_course:main",
-            "turtle_spawner_course = turtlesim_catch_them_all.turtle_spawner_course:main",
-            "turtle_pose_robotica = turtlesim_catch_them_all.turtle_pose_robotica:main",
+            "tiago = tiago_examples.tiago:main",
+            "tiago2 = tiago_examples.tiago2:main",
+            "laser_tiago = tiago_examples.laser_tiago:main",
         ],
     },
 )
