@@ -1,24 +1,7 @@
 # Executors em ROS2
 
-## Índice
-1. [Introdução](#introdução)
-2. [O que são Executors?](#o-que-são-executors)
-3. [Tipos de Executors](#tipos-de-executors)
-4. [Callback Groups](#callback-groups)
-5. [SingleThreadedExecutor](#singlethreadedexecutor)
-6. [MultiThreadedExecutor](#multithreadedexecutor)
-7. [Framework de Decisão](#framework-de-decisão)
-8. [Exemplos Práticos](#exemplos-práticos)
-9. [Integração com Outros Conceitos do ROS2](#integração-com-outros-conceitos-do-ros2)
-10. [Melhores Práticas](#melhores-práticas)
-
----
-
-## Introdução
-
 No ROS2, os **executors** são um componente fundamental da arquitetura rclpy/rclcpp que gerenciam a execução de nodes e seus callbacks associados. Compreender os executors é crucial para construir aplicações ROS2 eficientes, responsivas e bem estruturadas.
 
-Esta documentação fornece um guia abrangente sobre executors, callback groups e como tomar decisões informadas sobre qual executor e configuração de callback group usar em suas aplicações ROS2.
 
 ---
 
