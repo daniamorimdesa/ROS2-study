@@ -4,6 +4,15 @@ from rclpy.node import Node
 from my_robot_interfaces.msg import LedStateArray
 from my_robot_interfaces.srv import SetLed
 
+"""
+-> Versão do curso
+
+Este node cria um painel de LEDs que publica o estado dos LEDs
+e oferece um serviço para alterar o estado dos LEDs.
+- publisher: publica o estado dos LEDs em um tópico chamado "led_panel_state 
+- service server: oferece um serviço chamado "set_led" para alterar o estado dos LEDs
+"""
+
 class LEDPanelNode(Node):
     def __init__(self):
         super().__init__("led_panel")
