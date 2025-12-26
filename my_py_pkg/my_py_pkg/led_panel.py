@@ -7,6 +7,13 @@ from my_robot_interfaces.srv import SetLED
 # Step 1: create LED panel node and publish the LED panel state (with a custom message)
 # Step 2: add a service server inside the LED panel node (with a custom service definition)
 
+"""Este node cria um painel de LEDs que publica o estado dos LEDs
+e oferece um serviço para alterar o estado dos LEDs.
+
+- publisher: publica o estado dos LEDs em um tópico chamado "led_panel_status"
+- service server: oferece um serviço chamado "set_led" para alterar o estado dos LEDs
+"""
+
 class LEDPanelNode(Node):
 
     def __init__(self):

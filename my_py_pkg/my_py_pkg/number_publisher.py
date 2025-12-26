@@ -4,8 +4,13 @@ from rclpy.node import Node
 from rclpy.parameter import Parameter
 from example_interfaces.msg import Int64
 
+"""
+Este node é um publisher que publica um número inteiro em um tópico
+chamado /number a cada intervalo de tempo definido.
+O número e o intervalo de tempo podem ser configurados via parâmetros.
 
-# Nó para publicar um número, sempre o mesmo no tópico /number
+- publisher: publica no tópico "number"
+"""
 
 class NumberPublisherNode(Node):
 
@@ -23,22 +28,26 @@ class NumberPublisherNode(Node):
         # adicionar callback para mudanças de parâmetros
         self.add_on_set_parameters_callback(self.parameters_callback)
 
-        self.publisher_ = self.create_publisher(Int64, "number", 10)  # criar um publicador no tópico "number" com fila de tamanho 10
+        # criar um publicador no tópico "number" com fila de tamanho 10
+        self.publisher_ = self.create_publisher(Int64, "number", 10)  
+
         # criar um timer que chama publish_number a cada timer_period_ segundos
         self.timer_ = self.create_timer(self.timer_period_, self.publish_number) 
-        self.get_logger().info("Number Publisher has been started!")  # registrar uma mensagem de log
 
-    def publish_number(self):
-        msg = Int64()  # criar uma mensagem do tipo Int64
-        msg.data = self.number_  # definir o valor do número a ser publicado
+        self.get_logger().info("Number Publisher has been started!")  
+
+    # função para publicar o número
+    def publish_number(self): 
+        msg = Int64()                 # criar uma mensagem do tipo Int64
+        msg.data = self.number_       # definir o valor do número a ser publicado
         self.publisher_.publish(msg)  # publicar a mensagem
 
-    def parameters_callback(self, params: list[Parameter]): # callback para mudanças de parâmetros
+    # callback para mudanças de parâmetros
+    def parameters_callback(self, params: list[Parameter]): 
         for param in params:
             if param.name == "number":
                 self.number_ = param.value
                 self.get_logger().info(f"Parameter 'number' changed to: {self.number_}")
-
 
 
 def main(args=None):
