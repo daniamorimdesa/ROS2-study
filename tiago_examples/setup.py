@@ -24,9 +24,9 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            "tiago = tiago_examples.tiago:main",
-            "tiago2 = tiago_examples.tiago2:main",
             "laser_tiago = tiago_examples.laser_tiago:main",
+            "tiago_1 = tiago_examples.tiago_1:main", # adicionado entry point para tiago_1.py: código de odometria do TIAgo
+            "tiago_2 = tiago_examples.tiago_2:main", # adicionado entry point para tiago_2.py: mover o TIAgo para uma posição desejada
         ],
     },
 )

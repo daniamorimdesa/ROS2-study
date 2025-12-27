@@ -1,11 +1,15 @@
 import rclpy
 from rclpy.node import Node
-
+from sensor_msgs.msg import LaserScan
 import time
 import math
 
-from sensor_msgs.msg import LaserScan
+"""
+Este node processa os dados do laser para encontrar o obstáculo mais 
+próximo e calcula suas coordenadas cartesianas (x, y).
 
+- subscriber: assina mensagens do tópico "/scan_raw"
+"""
 
 class LaserClass(Node):
 
@@ -14,7 +18,8 @@ class LaserClass(Node):
 		
 		# Subscriber
 		self.create_subscription(LaserScan, '/scan_raw', self.laser_cb, 1)
-		
+	
+	# Callback function for LaserScan messages 
 	def laser_cb(self, msg):
 		# read ranges and pick the minimum value and its index
 		min_range = min(msg.ranges)
@@ -37,10 +42,8 @@ class LaserClass(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-
     laser = LaserClass()
     rclpy.spin(laser)
-	
     laser.destroy_node()
     rclpy.shutdown()
 

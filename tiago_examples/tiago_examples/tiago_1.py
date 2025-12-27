@@ -21,16 +21,22 @@ class TiagoClass(Node):
 		# Subscriber
 		self.create_subscription(Odometry, '/ground_truth_odom', self.pose_cb, 1)
 		
-
+	# função de callback para mensagens de odometria
 	def pose_cb(self, msg):
 		
-		# Extract relevant information
-		x = msg.pose.pose.position.x
-		y = msg.pose.pose.position.y
+		# Extrair posição
+		x = msg.pose.pose.position.x # armazenar a posição x
+		y = msg.pose.pose.position.y # armazenar a posição y
 
-		qtn = msg.pose.pose.orientation # extrair a orientação em quaternion
-		qtn_list = [qtn.x, qtn.y, qtn.z, qtn.w]
-		(roll, pitch, yaw) = euler_from_quaternion(qtn_list)
+		# extrair a orientação em quaternion
+		qtn = msg.pose.pose.orientation 
+
+		# converter quaternion para lista
+		qtn_list = [qtn.x, qtn.y, qtn.z, qtn.w] 
+
+		# converter quaternion para ângulos de Euler
+		(roll, pitch, yaw) = euler_from_quaternion(qtn_list) 
+
 		print(x, y, yaw)
 		
 		
@@ -40,7 +46,7 @@ def main(args=None):
     rclpy.spin(my_tiago)
     my_tiago.destroy_node()
     rclpy.shutdown()
-#------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     main()
 		
