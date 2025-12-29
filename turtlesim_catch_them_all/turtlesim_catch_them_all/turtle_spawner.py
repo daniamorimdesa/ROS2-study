@@ -40,21 +40,21 @@ class TurtleSpawnerNode(Node):
 
         self.get_logger().info("Turtle Spawner has been started!") # registrar uma mensagem de log
 
-    
+    # callback para o serviço /catch_turtle
     def callback_catch_turtle(self, request: CatchTurtle.Request, response: CatchTurtle.Response):
         # call kill service
         self.call_kill_service(request.name)
         response.success = True
         return response
 
-
-    def publish_alive_turtles(self): # publicar a lista de tartarugas vivas
+    # publicar a lista de tartarugas vivas
+    def publish_alive_turtles(self): 
         msg = TurtleArray()
         msg.turtles = self.alive_turtles_
         self.alive_turtles_publisher_.publish(msg)
 
-
-    def spawn_new_turtle(self): # callback para spawnar uma nova tartaruga
+    # callback para spawnar uma nova tartaruga
+    def spawn_new_turtle(self): 
         self.turtle_counter_ += 1
         name = self.turtle_name_prefix_ + str(self.turtle_counter_) # criar um nome único para a tartaruga
         x = uniform(2.0, 10.0)                                      # escolher uma coordenada x aleatória entre 2.0 e 10.0
@@ -62,7 +62,7 @@ class TurtleSpawnerNode(Node):
         theta = uniform(0.0, 2*pi)                                  # escolher uma orientação theta aleatória entre 0.0 e 2*pi
         self.call_spawn_service(name, x, y, theta)                  # chamar o serviço de spawnar a tartaruga
 
-  
+    # callback para spawnar uma nova tartaruga
     def call_spawn_service(self, turtle_name, x, y, theta): # chamar o serviço de spawnar a tartaruga
         while not self.spawn_client_.wait_for_service(1.0): # esperar até que o serviço esteja disponível
             self.get_logger().warn("Waiting for spawn service...")
@@ -73,12 +73,20 @@ class TurtleSpawnerNode(Node):
         request.theta = theta                            # definir a orientação theta
         request.name = turtle_name                       # definir o nome da tartaruga
 
-        future = self.spawn_client_.call_async(request)                                      # chamar o serviço de spawn de forma assíncrona
-        future.add_done_callback(partial(self.callback_call_spawn_service, request=request)) # adicionar um callback para processar a resposta do serviço
+        # chamar o serviço de spawn de forma assíncrona
+        future = self.spawn_client_.call_async(request)  
 
+        # adicionar um callback para processar a resposta do serviço                                    
+        future.add_done_callback(partial(self.callback_call_spawn_service, request=request)) 
+   
+    # callback para processar a resposta do serviço de spawn
     def callback_call_spawn_service(self, future, request: Spawn.Request):
-        response: Spawn.Response = future.result()                        # obter a resposta do serviço
-        if response.name != "":                                            # se a tartaruga foi spawnada com sucesso
+
+        # obter a resposta do serviço
+        response: Spawn.Response = future.result()      
+
+        # se a tartaruga foi spawnada com sucesso
+        if response.name != "":                                           
             self.get_logger().info(f"New alive turtle: {response.name}")
 
             # adicionar a nova tartaruga à lista de vivas
@@ -89,9 +97,12 @@ class TurtleSpawnerNode(Node):
             new_turtle.theta = request.theta
             self.alive_turtles_.append(new_turtle)
             self.publish_alive_turtles()  # publicar a lista atualizada de tartarugas vivas
-    
-    def call_kill_service(self, turtle_name): # chamar o serviço /kill
-        while not self.kill_client_.wait_for_service(1.0): # esperar até que o serviço esteja disponível
+
+    # chamar o serviço /kill
+    def call_kill_service(self, turtle_name): 
+
+        # esperar até que o serviço esteja disponível
+        while not self.kill_client_.wait_for_service(1.0):
             self.get_logger().warn("Waiting for kill service...")
 
         request = Kill.Request()
@@ -100,20 +111,19 @@ class TurtleSpawnerNode(Node):
         future = self.kill_client_.call_async(request)
         future.add_done_callback(partial(self.callback_call_kill_service, turtle_name=turtle_name))
 
+    # callback para processar a resposta do serviço de kill
     def callback_call_kill_service(self, future, turtle_name):
         for (i, turtle) in enumerate(self.alive_turtles_):
             if turtle.name == turtle_name:
                 del self.alive_turtles_[i]
                 self.publish_alive_turtles()
                 break
-
-
     
 def main(args=None):
-    rclpy.init(args=args) # inicializar o rclpy
+    rclpy.init(args=args)      # inicializar o rclpy
     node = TurtleSpawnerNode() # instanciar o nó
-    rclpy.spin(node) # manter o nó ativo para processar callbacks(até que se aperte Ctrl+C)
-    rclpy.shutdown() # finalizar o rclpy
+    rclpy.spin(node)           # manter o nó ativo 
+    rclpy.shutdown()           # finalizar o rclpy
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     main()
