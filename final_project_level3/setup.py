@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'tiago_examples'
+package_name = 'final_project_level3'
 
 setup(
     name=package_name,
@@ -13,9 +13,9 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='das9',
+    maintainer='daniela',
     maintainer_email='daniela.amorimdesa@gmail.com',
-    description='Exemplos de código para o robô TIAgo desenvolvidos em sala de aula',
+    description='Final project level 3 with turtlesim',
     license='Apache-2.0',
     extras_require={
         'test': [
@@ -24,9 +24,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            "laser_tiago = tiago_examples.laser_tiago:main",
-            "tiago_1 = tiago_examples.tiago_1:main", # adicionado entry point para tiago_1.py: código de odometria do TIAgo
-            "tiago_2 = tiago_examples.tiago_2:main", # adicionado entry point para tiago_2.py: mover o TIAgo para uma posição desejada
+            'turtle_controller = final_project_level3.turtle_controller:main',
+            'turtle_controller_2 = final_project_level3.turtle_controller_2:main',
         ],
     },
 )

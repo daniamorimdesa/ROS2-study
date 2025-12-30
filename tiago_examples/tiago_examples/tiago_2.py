@@ -6,10 +6,10 @@ from geometry_msgs.msg import Twist
 from math import sqrt, atan2, pi
 
 """
-Adaptar código do turtlesim(turtle_pose_robotica.py) para o robô TIAgo, que deve se mover para uma posição desejada, 
-publicando no tópico /cmd_vel. O robô deve rotacionar até alinhar com a 
-direção do destino e depois se mover em linha reta até chegar na posição
-desejada. 
+Adaptar código do turtlesim(turtle_pose_robotica.py) para o robô TIAgo, 
+que deve se mover para uma posição desejada, publicando no tópico /cmd_vel. 
+O robô deve rotacionar até alinhar com a direção do destino e depois se mover 
+em linha reta até chegar na posição desejada. 
 
 Dica: se quiser “odom realista”, troque /ground_truth_odom por /mobile_base_controller/odom.
 """
@@ -28,14 +28,15 @@ class TiagoPoseNode(Node):
         self.goalReached = False    # flag para indicar se chegou no destino
 
         # posição final desejada (goal)
-        self.x_goal = 5.0
-        self.y_goal = 5.0
+        self.x_goal = 0.0
+        self.y_goal = 0.0
 
         # ganhos e tolerâncias
-        self.k_angular = 2.0  # ganho angular
+        self.k_angular = 4.0  # ganho angular
         self.k_linear = 0.6   # ganho linear
-        self.yaw_tol = 0.02  # tolerância angular
-        self.dist_tol = 0.05  # tolerância de distância
+        self.yaw_tol = 0.1  # tolerância angular (cerca de 5.7 graus)
+        self.dist_tol = 0.15  # tolerância de distância (aumentada)
+        self.max_linear_vel = 0.5  # velocidade linear máxima
 
         # criar um subscriber para saber a posição atual do TIAgo
         self.odom_subscriber_ = self.create_subscription(Odometry, "/ground_truth_odom", self.callback_odom, 10)
@@ -48,9 +49,8 @@ class TiagoPoseNode(Node):
 
         self.get_logger().info("Tiago Pose Node has been started!") # registrar uma mensagem de log
 
-
+    # função de callback para mensagens de odometria
     def callback_odom(self, msg: Odometry): 
-
 
         self.x_ = msg.pose.pose.position.x # armazenar a posição x
         self.y_ = msg.pose.pose.position.y # armazenar a posição y
@@ -60,7 +60,7 @@ class TiagoPoseNode(Node):
         # converter quaternion para yaw e armazenar
         self.yaw_ = self.quaternion_to_yaw(q.x, q.y, q.z, q.w) 
 
-    
+    # função de controle para mover o TIAgo
     def control_loop(self):
         # garantir que a pose foi recebida
         if self.x_ is None or self.y_ is None or self.yaw_ is None:
@@ -91,6 +91,7 @@ class TiagoPoseNode(Node):
         if not self.rotationIsOver:
             cmd.linear.x = 0.0                              # não mover linearmente
             cmd.angular.z = self.k_angular * diff_angular   # velocidade angular proporcional à diferença angular
+            self.get_logger().info(f"Rotating: diff_angular={diff_angular:.3f} rad, tolerance={self.yaw_tol}")
              
             if abs(diff_angular) < self.yaw_tol: # se a diferença angular for pequena o suficiente
                 self.rotationIsOver = True
@@ -98,20 +99,25 @@ class TiagoPoseNode(Node):
                 self.get_logger().info("Rotation complete!")
         
         # Mover em linha reta
-        elif distance > self.dist_tol:
-            cmd.linear.x = self.k_linear * distance   # velocidade linear proporcional à distância
+        if self.rotationIsOver and distance > self.dist_tol:
+            # saturar velocidade linear
+            linear_vel = self.k_linear * distance
+            cmd.linear.x = min(linear_vel, self.max_linear_vel)   # limitar velocidade máxima
             cmd.angular.z = 0.0                       # manter orientação
+            self.get_logger().info(f"Moving forward: distance={distance:.2f}, linear.x={cmd.linear.x:.2f}")
 
         # quando chegar no destino
-        else:
+        if distance <= self.dist_tol and self.rotationIsOver:
+            cmd.linear.x = 0.0
+            cmd.angular.z = 0.0
             self.goalReached = True
             self.get_logger().info(f"Goal reached! x={self.x_:.2f}, y={self.y_:.2f}, yaw={self.yaw_:.2f} rad")
-            return
         
         self.cmd_vel_publisher_.publish(cmd) # publicar o comando de velocidade
-
+    
+    # converter quaternion para yaw (ângulo em torno do eixo z)
     def quaternion_to_yaw(self, x, y, z, w)-> float:
-        # converter quaternion para yaw (ângulo em torno do eixo z)
+
         # yaw (Z) de quaternion
         # yaw = atan2(2(wz + xy), 1 - 2(y² + z²))
         siny_cosp = 2.0 * (w * z + x * y)
@@ -121,10 +127,10 @@ class TiagoPoseNode(Node):
 
 
 def main(args=None):
-    rclpy.init(args=args) # inicializar o rclpy
+    rclpy.init(args=args)  # inicializar o rclpy
     node = TiagoPoseNode() # instanciar o nó
-    rclpy.spin(node) # manter o nó ativo
-    rclpy.shutdown() # finalizar o rclpy
+    rclpy.spin(node)       # manter o nó ativo
+    rclpy.shutdown()       # finalizar o rclpy
 #-----------------------------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     main()
