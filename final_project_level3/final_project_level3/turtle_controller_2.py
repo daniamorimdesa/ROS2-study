@@ -13,6 +13,19 @@ from my_robot_interfaces.action import MoveTurtle
 from rclpy.action import ActionServer
 from rclpy.action.server import ServerGoalHandle, GoalResponse, CancelResponse
 
+"""
+Step 2 do final project level 3:
+Este node faz o spawn de uma tartaruga no turtlesim e implementa um Action Server
+para controlar seus movimentos através de comandos de velocidade (Twist).
+
+Funcionalidades:
+- Usa service client para chamar o serviço /spawn do turtlesim
+- Cria um Action Server (MoveTurtle) para controlar a velocidade da tartaruga spawnada
+- O nome da tartaruga pode ser configurado via parâmetro (padrão: turtle1)
+- Previne race conditions usando locks e handle_accepted_callback
+- Valida goals (velocidades e duração) antes de aceitar
+- Suporta cancelamento de goals durante execução
+"""
 
 class TurtleControllerNode(Node):
 
