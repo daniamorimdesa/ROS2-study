@@ -26,6 +26,8 @@ setup(
         'console_scripts': [
             'turtle_controller = final_project_level3.turtle_controller:main',
             'turtle_controller_2 = final_project_level3.turtle_controller_2:main',
+            "turtle_controller_3 = final_project_level3.turtle_controller_3:main",
+            
         ],
     },
 )

@@ -8,6 +8,7 @@
   <license>Apache-2.0</license>
 
   <depend>rclpy</depend>
+  <depend>rclpy_lifecycle</depend>
   <depend>geometry_msgs</depend>
   <depend>turtlesim</depend>
   <depend>example_interfaces</depend>
