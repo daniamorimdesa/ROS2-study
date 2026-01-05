@@ -77,7 +77,7 @@ class SetSpeedServer(Node):
 
 def main(args=None):
     rclpy.init(args=args)     # inicializar o rclpy
-    node = SetSpeedServer() # instanciar o nó
+    node = SetSpeedServer()   # instanciar o nó
     rclpy.spin(node)          # manter o nó ativo para processar callbacks
     rclpy.shutdown()          # finalizar o rclpy
 #-------------------------------------------------------------------------------------------------------------------
