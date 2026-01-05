@@ -4,7 +4,14 @@ from rclpy.node import Node
 from my_robot_interfaces_prova_robotica2.srv import SetSpeed # importar o serviço SetSpeed
 from functools import partial
 
-
+"""
+Este node implementa um cliente de serviço ROS2 chamado "set_speed_client" que envia requisições
+para definir a velocidade linear e angular de um robô. 
+O cliente utiliza o serviço SetSpeed, que inclui os campos:
+- enable (bool): indica se o robô deve ser habilitado
+- linear (float): velocidade linear desejada
+- angular (float): velocidade angular desejada
+"""
 class SetSpeedClient(Node):
 
     def __init__(self):
@@ -47,8 +54,11 @@ class SetSpeedClient(Node):
         # registrar a resposta recebida
         self.get_logger().info(f'\033[36mGot response: {str(response.message)}\033[0m') # cor ciano
 
-        # registrar a resposta com os valores da requisição
-        # self.get_logger().info(f"Result of {request.a} + {request.b} = {response.sum}") 
+        # registrar a resposta com os valores da requisição (partial serve para passar a requisição original)
+        # self.get_logger().info(
+        #     f'\033[36mRequest -> Enable: {request.enable}, Linear: {request.linear}, Angular: {request.angular} | '
+        #     f'Response -> Success: {response.success}, Applied Linear: {response.applied_linear}, Applied Angular: {response.applied_angular}\033[0m'
+        # ) # cor ciano
 
 
 
