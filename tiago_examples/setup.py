@@ -29,6 +29,7 @@ setup(
             "tiago_2 = tiago_examples.tiago_2:main", # adicionado entry point para tiago_2.py: mover o TIAgo para uma posição desejada
             "tiago_3 = tiago_examples.tiago_3:main", 
             "tiago_obstacle_avoidance = tiago_examples.tiago_obstacle_avoidance:main",
+            "tiago_obstacle_avoidance_2 = tiago_examples.tiago_obstacle_avoidance_2:main",
         ],
     },
 )

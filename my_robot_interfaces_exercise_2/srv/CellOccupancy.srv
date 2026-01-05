@@ -1,0 +1,7 @@
+# Request(coordenadas de uma célula): x (int), y (int)
+int64 x
+int64 y
+---
+# Response(livre ou ocupada): occupied (bool) | message (string)
+bool occupied
+string message
