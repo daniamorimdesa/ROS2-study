@@ -16,10 +16,10 @@ class TiagoObstacleAvoidance(Node):
         super().__init__("tiago_obstacle_avoidance")
         
         # Parâmetros de segurança
-        self.safe_distance_ = 0.8      # distância mínima de segurança (m)
-        self.danger_distance_ = 0.5    # distância de perigo (m)
-        self.emergency_distance_ = 0.3 # distância crítica 360° (m) - bloqueia rotação
-        self.side_diff_threshold_ = 0.3 # diferença mínima entre lados para decidir direção (m)
+        self.safe_distance_ = 1.5      # distância mínima de segurança (m)
+        self.danger_distance_ = 1.0    # distância de perigo (m)
+        self.emergency_distance_ = 0.5 # distância crítica 360° (m) - bloqueia rotação
+        self.side_diff_threshold_ = 0.5 # diferença mínima entre lados para decidir direção (m)
         
         # Velocidades
         self.max_linear_vel_ = 0.5
